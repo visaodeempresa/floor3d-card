@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { LitElement, html, TemplateResult, css, PropertyValues, CSSResultGroup, render } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import {
@@ -17,11 +17,11 @@ import { localize } from './localize/localize';
 //import three.js libraries for 3D rendering
 import * as TWEEN from '@tweenjs/tween.js';
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader';
-import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
-import { Sky } from 'three/examples/jsm/objects/Sky';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
+import { GLTFLoader, GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { Sky } from 'three/examples/jsm/objects/Sky.js';
 import { Object3D } from 'three';
 import '../elements/button';
 
@@ -110,7 +110,7 @@ export class Floor3dCard extends LitElement {
   private _longpressTimeout: any;
   private _mouseupEventListener: EventListener;
   private _currentIntersections: THREE.Intersection[];
-  private _changeListener: EventListener;
+  private _changeListener: () => void;
   private _cardObscured: boolean;
   private _card?: HTMLElement;
   private _content?: HTMLElement;
@@ -437,7 +437,7 @@ export class Floor3dCard extends LitElement {
     this._content.removeEventListener('dblclick', this._performActionListener);
     this._content.removeEventListener('touchstart', this._performActionListener);
     this._content.removeEventListener('keydown', this._performActionListener);
-    this._controls.removeEventListener('change', this._changeListener);
+    this._controls.removeEventListener('change', this._changeListener as any);
 
     this._renderer.setAnimationLoop(null);
     this._resizeObserver.disconnect();
@@ -1311,15 +1311,14 @@ export class Floor3dCard extends LitElement {
       this._scene.background = new THREE.Color('#aaaaaa');
     }
 
-    //this._renderer.physicallyCorrectLights = true;
+    //this._renderer.useLegacyLights = false;
     if (this._config.sky && this._config.sky == 'yes') {
-      this._renderer.outputEncoding = THREE.sRGBEncoding;
+      this._renderer.outputColorSpace = THREE.SRGBColorSpace;
     }
     this._renderer.toneMapping = THREE.LinearToneMapping;
     //this._renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this._renderer.toneMappingExposure = 0.6;
     this._renderer.localClippingEnabled = true;
-    this._renderer.physicallyCorrectLights = false;
 
     if (this._config.path && this._config.path != '') {
       let path = this._config.path;
@@ -1342,8 +1341,8 @@ export class Floor3dCard extends LitElement {
             this._config.mtlfile,
             this._onLoaded3DMaterials.bind(this),
             this._onLoadMaterialProgress.bind(this),
-            function (error: ErrorEvent): void {
-              throw new Error(error.error);
+            function (error: unknown): void {
+              throw new Error(String(error));
             },
           );
         } else {
@@ -1352,8 +1351,8 @@ export class Floor3dCard extends LitElement {
             path + this._config.objfile,
             this._onLoaded3DModel.bind(this),
             this._onLoadObjectProgress.bind(this),
-            function (error: ErrorEvent): void {
-              throw new Error(error.error);
+            function (error: unknown): void {
+              throw new Error(String(error));
             },
           );
         }
@@ -1365,8 +1364,8 @@ export class Floor3dCard extends LitElement {
           this._config.objfile,
           this._onLoadedGLTF3DModel.bind(this),
           this._onloadedGLTF3DProgress.bind(this),
-          function (error: ErrorEvent): void {
-            throw new Error(error.error);
+          function (error: unknown): void {
+            throw new Error(String(error));
           },
         );
         this._modeltype = ModelSource.GLB;
@@ -1466,7 +1465,7 @@ export class Floor3dCard extends LitElement {
       this._renderer.setPixelRatio(window.devicePixelRatio);
 
       this._controls.maxPolarAngle = (0.85 * Math.PI) / 2;
-      this._controls.addEventListener('change', this._changeListener);
+      this._controls.addEventListener('change', this._changeListener as any);
 
       this._setLookAt();
 
@@ -2026,8 +2025,8 @@ export class Floor3dCard extends LitElement {
       path + this._config.objfile,
       this._onLoaded3DModel.bind(this),
       this._onLoadObjectProgress.bind(this),
-      function (error: ErrorEvent): void {
-        throw new Error(error.error);
+      function (error: unknown): void {
+        throw new Error(String(error));
       },
     );
     console.log('Material loaded end');
@@ -2297,7 +2296,7 @@ export class Floor3dCard extends LitElement {
                     const box: THREE.Box3 = new THREE.Box3();
                     box.setFromObject(_foundobject);
 
-                    let light = new THREE.Light();
+                    let light: THREE.SpotLight | THREE.PointLight;
 
                     let x: number, y: number, z: number;
 
@@ -2553,7 +2552,7 @@ export class Floor3dCard extends LitElement {
           newRoomBox.expandByVector(expansion);
 
           const dimensions = new THREE.Vector3().subVectors(newRoomBox.max, newRoomBox.min);
-          const newRoomGeometry: THREE.BoxBufferGeometry = new THREE.BoxBufferGeometry(
+          const newRoomGeometry: THREE.BoxGeometry = new THREE.BoxGeometry(
             dimensions.x - 4,
             dimensions.y - 4,
             dimensions.z - 4,
