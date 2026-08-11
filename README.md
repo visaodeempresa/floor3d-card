@@ -1,3 +1,13 @@
+<!-- MW-BRAND:BEGIN — gerado por IA/tools/mw-brand.sh · não editar à mão -->
+<p align="center">
+  <a href="https://github.com/visaodeempresa">
+    <img src="docs/brand/logo.png" alt="Visão de Empresa — MAYCON WILLIAN OLIVEIRA" width="96">
+  </a>
+  <br>
+  <sub><b>Visão de Empresa</b> · adaptação e manutenção por MAYCON WILLIAN OLIVEIRA</sub>
+</p>
+<!-- MW-BRAND:END -->
+
 # new-floor3d-card — Home Assistant 3D Digital Twin
 
 > Interactive 3D floor plan card for Home Assistant, powered by Three.js r138.
